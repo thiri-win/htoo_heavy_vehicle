@@ -1,6 +1,86 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require("../prisma/client");
+const ExcelJs = require('exceljs');
+
+router.get('/export/excel', async (req, res) => {
+    try {
+        const { startDate, endDate, payment_type } = req.query;
+        const where = {};
+        if (payment_type) {
+            where.payment_type = payment_type;
+        }
+
+        const now = new Date();
+        const defaultStartDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        const start = startDate ? new Date(startDate) : defaultStartDate;
+        const end = endDate ? new Date(endDate) : new Date();
+        end.setHours(23, 59, 59, 999);
+
+        where.date = {
+            gte: start,
+            lte: end
+        }
+
+        const invoices = await prisma.invoice.findMany({
+            where,
+            orderBy: { date: 'desc' },
+            include: {
+                customer: true,
+                car: true
+            }
+        });
+        const workbook = new ExcelJs.Workbook();
+        const worksheet = workbook.addWorksheet('Invoice Report');
+
+        worksheet.columns = [
+            { header: 'Invoice No', key: 'invoice_number', width: 18 },
+            { header: 'Date', key: 'date', width: 15 },
+            { header: 'Customer Name', key: 'customer_name', width: 22 },
+            { header: 'Phone', key: 'phone', width: 16 },
+            { header: 'Car Number', key: 'car_number', width: 16 },
+            { header: 'Payment Type', key: 'payment_type', width: 15 },
+            { header: 'Payment Date', key: 'payment_date', width: 15 },
+            { header: 'Sub Total (Ks)', key: 'sub_total', width: 18 },
+            { header: 'Advance (Ks)', key: 'advance', width: 18 },
+            { header: 'Grand Total (Ks)', key: 'grand_total', width: 18 },
+        ]
+
+        const headerRow = worksheet.getRow(1);
+        headerRow.font = { name: 'Pyidaungsu', size: 11, bold: true };
+
+        invoices.forEach(inv => {
+            const row = worksheet.addRow({
+                invoice_number: inv.invoice_number,
+                date: new Date(inv.date).toLocaleDateString(),
+                customer_name: inv.customer?.name || 'N/A',
+                phone: inv.customer?.phone || 'N/A',
+                car_number: inv.car?.number || 'N/A',
+                payment_type: inv.payment_type,
+                payment_date: inv.payment_date ? new Date(inv.payment_date).toLocaleDateString() : '-',
+                sub_total: inv.sub_total,
+                advance: inv.advance,
+                grand_total: inv.grand_total,
+            })
+            row.font = { name: 'Pyidaungsu', size: 10 }
+        })
+        res.setHeader(
+            'Content-Type',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+        res.setHeader(
+            'Content-Disposition',
+            `attachment; filename=Invoices_Report_${Date.now()}.xlsx`
+        );
+
+        await workbook.xlsx.write(res);
+        res.status(200).end();
+
+    } catch (error) {
+        console.log("Excel Export Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+})
 
 async function processCustomer(tx, customerData) {
     if (!customerData || !customerData.name) return null;
@@ -187,12 +267,12 @@ router.get('/', async (req, res) => {
         const {
             page = 1,
             limit = 10,
-            search,       
+            search,
             customer_name,
-            car_number,   
-            item_name,    
-            startDate,    
-            endDate       
+            car_number,
+            item_name,
+            startDate,
+            endDate
         } = req.query;
 
         const pageNum = parseInt(page);
