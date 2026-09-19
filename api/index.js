@@ -1,16 +1,16 @@
 const express = require('express');
 const app = express();
+
+// to delete if no need
 // const cors = require('cors');
-
 // app.use(cors());
-app.use(express.json());
 
+app.use(express.json());
 
 const authRoutes = require('./routes/auth')
 const invoiceRoutes = require('./routes/invoice')
 const customerRoutes = require('./routes/customer')
 const carRoutes = require('./routes/car');
-const { car } = require('./prisma/client');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/invoices', invoiceRoutes);
