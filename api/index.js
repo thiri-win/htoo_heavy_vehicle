@@ -17,6 +17,10 @@ app.use('/api/invoices', invoiceRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/cars', carRoutes);
 
+app.get('/', (req, res) => {
+    res.status(200).json({ message: "API is running successfully!" });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running localhost:${PORT}`);
