@@ -7,8 +7,9 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'https://api-six-xi-11.vercel.app',
         changeOrigin: true,
+        secure: true,
       },
     },
   },

@@ -9,7 +9,10 @@ export type Invoice = {
 }
 export type Page<T> = { data: T[]; pagination?: { total_items: number; current_page: number; per_page: number; total_pages: number } }
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api'
+// The frontend is deployed separately from the API, so use the live API by default.
+// VITE_API_URL can still override this for another environment, but it should include
+// the `/api` path (for example: https://api-six-xi-11.vercel.app/api).
+const API_BASE = (import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/api' : 'https://api-six-xi-11.vercel.app/api')).replace(/\/$/, '')
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = localStorage.getItem('htoo_token')

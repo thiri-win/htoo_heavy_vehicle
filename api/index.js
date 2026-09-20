@@ -1,9 +1,12 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
 
-// to delete if no need
-// const cors = require('cors');
-// app.use(cors());
+app.use(cors({
+    origin: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
 app.use(express.json());
 
