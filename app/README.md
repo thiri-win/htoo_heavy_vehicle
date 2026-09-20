@@ -1,16 +1,22 @@
-# React + Vite
+# HTOO Heavy Vehicle frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Responsive React + TypeScript + Vite frontend for the invoice management API.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+The Vite dev server proxies `/api` to `http://localhost:3000`. Set `VITE_API_URL` when the API is hosted elsewhere. The app includes demo data and demo sign-in (`demo@htoo.com` / `password`) so the UI can be previewed before the database is populated.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Included
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- JWT sign-in/sign-up flow wired to `/api/auth`
+- Dashboard overview with revenue, payment mix, and activity charts
+- Searchable and paginated invoices, customers, vehicles, and service catalog
+- CRUD dialogs for customers, vehicles, services, and invoices
+- Invoice print layout with browser PDF support
+- Excel export wired to `/api/invoices/export/excel`
+- Responsive desktop/mobile shell with shadcn-inspired design tokens and primitives
