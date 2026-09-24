@@ -15,12 +15,14 @@ const invoiceRoutes = require('./routes/invoice')
 const customerRoutes = require('./routes/customer')
 const carRoutes = require('./routes/car');
 const itemRoutes = require('./routes/item');
+const userRoutes = require('./routes/user');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/cars', carRoutes);
 app.use('/api/items', itemRoutes);
+app.use('/api/users', userRoutes);
 
 app.get('/', (req, res) => {
     res.status(200).json({ message: "API is running successfully!" });

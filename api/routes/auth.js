@@ -12,7 +12,7 @@ router.get("/welcome", (req, res) => {
 
 router.post('/signup', async (req, res) => {
     try {
-        const { name, email, password, role_id } = req.body;
+        const { name, email, password } = req.body;
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
             return res.status(400).json({ error: "Email already Taken. Try to Sign in" });
@@ -23,7 +23,7 @@ router.post('/signup', async (req, res) => {
                 name,
                 email,
                 password: hashedPassword,
-                role_id: role_id || 2,
+                role_id: 3,
             }
         });
         res.status(201).json({ message: "User Created Successfully", data: newUser })

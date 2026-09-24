@@ -1,4 +1,4 @@
-export type User = { id: number; name: string; email: string; role_id?: number }
+export type User = { id: number; name: string; email: string; role_id?: number; role?: { id: number; name: string }; createdAt?: string }
 export type Customer = { id: number; name: string; phone?: string | null; _count?: { invoices: number; cars: number } }
 export type Car = { id: number; number: string; model?: string | null; brand?: string | null; customer_id: number; customer?: Customer }
 export type Item = { id: number; name: string; price?: number }
@@ -28,6 +28,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
   async signIn(email: string, password: string) { return request<{ token: string; user: User }>('/auth/signin', { method: 'POST', body: JSON.stringify({ email, password }) }) },
   async signUp(name: string, email: string, password: string) { return request<{ data: User }>('/auth/signup', { method: 'POST', body: JSON.stringify({ name, email, password }) }) },
+  async users() { return request<Page<User>>('/users') },
+  async updateUserRole(id: number, role_id: number) { return request<{ data: User }>(`/users/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role_id }) }) },
   async customers() { return request<Page<Customer>>('/customers') },
   async createCustomer(data: Pick<Customer, 'name'>) { return request<{ data: Customer }>('/customers', { method: 'POST', body: JSON.stringify(data) }) },
   async updateCustomer(id: number, data: Pick<Customer, 'name'>) { return request<{ data: Customer }>(`/customers/${id}`, { method: 'PATCH', body: JSON.stringify(data) }) },
