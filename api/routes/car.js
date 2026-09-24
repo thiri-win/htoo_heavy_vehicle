@@ -58,7 +58,7 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     try {
-        const id = parstInt(req.params.id);
+        const id = parseInt(req.params.id);
         await prisma.car.delete({ where: { id } });
         res.status(200).json({ message: 'Car deleted' });
     } catch (error) {
