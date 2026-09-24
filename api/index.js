@@ -16,13 +16,16 @@ const customerRoutes = require('./routes/customer')
 const carRoutes = require('./routes/car');
 const itemRoutes = require('./routes/item');
 const userRoutes = require('./routes/user');
+const adminRoutes = require('./routes/admin');
+const { authenticate } = require('./auth-middleware');
 
 app.use('/api/auth', authRoutes);
-app.use('/api/invoices', invoiceRoutes);
-app.use('/api/customers', customerRoutes);
-app.use('/api/cars', carRoutes);
-app.use('/api/items', itemRoutes);
+app.use('/api/invoices', authenticate, invoiceRoutes);
+app.use('/api/customers', authenticate, customerRoutes);
+app.use('/api/cars', authenticate, carRoutes);
+app.use('/api/items', authenticate, itemRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/admin', authenticate, adminRoutes);
 
 app.get('/', (req, res) => {
     res.status(200).json({ message: "API is running successfully!" });

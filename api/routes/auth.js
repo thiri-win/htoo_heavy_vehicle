@@ -2,11 +2,12 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require("../prisma/client");
+const { authenticate } = require('../auth-middleware');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secrete_key';
 
-router.get("/welcome", (req, res) => {
+router.get("/welcome", authenticate, (req, res) => {
     res.json({ msg: "welcome" });
 })
 

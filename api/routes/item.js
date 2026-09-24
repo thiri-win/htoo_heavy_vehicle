@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../prisma/client');
+const { requireAdmin } = require('../auth-middleware');
 
 router.get('/', async (req, res) => {
     try {
@@ -58,7 +59,7 @@ router.put('/:id', async (req, res) => {
     }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         await prisma.item.delete({ where: { id } });

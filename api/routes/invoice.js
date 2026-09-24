@@ -292,6 +292,19 @@ router.patch('/:id', async (req, res) => {
     }
 });
 
+// Any authenticated user may delete invoices. The parent route is protected by authenticate.
+router.delete('/:id', async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        if (Number.isNaN(id)) return res.status(400).json({ error: 'Invalid invoice' });
+        await prisma.invoice.delete({ where: { id } });
+        res.status(200).json({ message: 'Invoice deleted successfully' });
+    } catch (error) {
+        if (error.code === 'P2025') return res.status(404).json({ error: 'Invoice not found' });
+        res.status(500).json({ error: error.message });
+    }
+});
+
 router.get('/', async (req, res) => {
     try {
         const {
