@@ -9,6 +9,7 @@
     "dev": "nodemon index.js",
     "build": "prisma generate",
     "vercel-build": "prisma generate",
+    "db:reset-and-seed": "node scripts/reset-and-seed.js",
     "postinstall": "prisma generate"
   },
   "keywords": [],

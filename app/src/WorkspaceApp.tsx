@@ -67,7 +67,7 @@ export function WorkspaceApp({ user, setUser }: { user: User; setUser: (user: Us
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = 'htoo-heavy-vehicle-database-backup.json'
+      link.download = 'htoo-heavy-vehicle-database-backup.sql'
       link.click()
       URL.revokeObjectURL(url)
       notify(t(language, 'databaseDownloaded'))
