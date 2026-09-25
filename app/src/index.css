@@ -28,6 +28,10 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.03em; 
 .user-card strong { font-size: 12px; display: block; }
 .user-card small { color: var(--muted); font-size: 10px; }
 .main { min-width: 0; flex: 1; height: 100vh; margin-left: 250px; overflow-y: auto; transition: margin-left .22s ease; }
+.main { overscroll-behavior-y: contain; }
+.pull-refresh-indicator { display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; color: var(--brand); transition: height .16s ease; }
+.pull-refresh-spinner { width: 22px; height: 22px; border: 2px solid color-mix(in srgb, var(--brand) 22%, transparent); border-top-color: var(--brand); border-radius: 50%; animation: pull-refresh-spin .75s linear infinite; }
+@keyframes pull-refresh-spin { to { transform: rotate(360deg); } }
 .sidebar.collapsed + .main { margin-left: 78px; }
 .topbar { height: 73px; background: rgba(255,255,255,.84); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 34px; position: sticky; top: 0; z-index: 5; backdrop-filter: blur(12px); }
 .breadcrumb { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; }

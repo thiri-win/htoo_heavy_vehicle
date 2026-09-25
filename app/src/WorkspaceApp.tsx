@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { api, type Car, type Customer, type Invoice, type Item, type User } from './lib/api'
 import { cn } from './lib/utils'
@@ -27,6 +27,10 @@ export function WorkspaceApp({ user, setUser }: { user: User; setUser: (user: Us
   const [printOptions, setPrintOptions] = useState<PrintOptions>({ header: 'HTOO Heavy Vehicle', subtitle: 'Workshop service invoice', address: 'Yangon, Myanmar', phone: '', accent: '#5c5ce6', design: 'classic' })
   const [loadingData, setLoadingData] = useState(false)
   const [dataError, setDataError] = useState('')
+  const [refreshing, setRefreshing] = useState(false)
+  const [pullDistance, setPullDistance] = useState(0)
+  const pullDistanceRef = useRef(0)
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
 
   const invoiceId = Number(pathname.match(/^\/invoices\/([^/]+)/)?.[1])
   const customerId = Number(pathname.match(/^\/customers\/([^/]+)/)?.[1])
@@ -42,23 +46,46 @@ export function WorkspaceApp({ user, setUser }: { user: User; setUser: (user: Us
   useEffect(() => { document.documentElement.dataset.theme = theme; localStorage.setItem('htoo_theme', theme) }, [theme])
   useEffect(() => { document.documentElement.lang = language === 'my' ? 'my' : 'en'; localStorage.setItem('htoo_language', language) }, [language])
   useEffect(() => { localStorage.setItem('htoo_sidebar_collapsed', String(sidebarCollapsed)) }, [sidebarCollapsed])
-  useEffect(() => {
-    setLoadingData(true)
+  const refreshData = useCallback(async (initialLoad = false) => {
+    if (initialLoad) setLoadingData(true)
+    else setRefreshing(true)
     setDataError('')
-    setCustomers([])
-    setCars([])
-    setInvoices([])
-    setCatalogItems([])
-    Promise.allSettled([api.customers(), api.cars(), api.invoices('page=1&limit=1000'), api.items()]).then(([customersResult, carsResult, invoicesResult, itemsResult]) => {
+    try {
+      const [customersResult, carsResult, invoicesResult, itemsResult] = await Promise.allSettled([api.customers(), api.cars(), api.invoices('page=1&limit=1000'), api.items()])
       if (customersResult.status === 'fulfilled') setCustomers(customersResult.value.data || [])
       if (carsResult.status === 'fulfilled') setCars(carsResult.value.data || [])
       if (invoicesResult.status === 'fulfilled') setInvoices(invoicesResult.value.data || [])
       if (itemsResult.status === 'fulfilled') setCatalogItems(itemsResult.value.data || [])
       const failed = [customersResult, carsResult, invoicesResult, itemsResult].find((result) => result.status === 'rejected')
       if (failed?.status === 'rejected') setDataError(failed.reason instanceof Error ? failed.reason.message : 'Unable to load data from the API.')
+    } finally {
       setLoadingData(false)
-    })
-  }, [user])
+      setRefreshing(false)
+    }
+  }, [])
+
+  useEffect(() => { void refreshData(true) }, [refreshData, user])
+
+  const handleTouchStart = (event: React.TouchEvent<HTMLElement>) => {
+    if (event.touches.length !== 1 || event.currentTarget.scrollTop > 0 || refreshing || loadingData) return
+    touchStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY }
+  }
+  const handleTouchMove = (event: React.TouchEvent<HTMLElement>) => {
+    const start = touchStart.current
+    if (!start || event.touches.length !== 1) return
+    const deltaY = event.touches[0].clientY - start.y
+    const deltaX = event.touches[0].clientX - start.x
+    if (deltaY <= 0 || Math.abs(deltaX) > deltaY) { pullDistanceRef.current = 0; setPullDistance(0); return }
+    const distance = Math.min(92, deltaY * 0.5)
+    pullDistanceRef.current = distance
+    setPullDistance(distance)
+  }
+  const handleTouchEnd = () => {
+    touchStart.current = null
+    if (pullDistanceRef.current >= 58 && !refreshing && !loadingData) void refreshData()
+    pullDistanceRef.current = 0
+    setPullDistance(0)
+  }
 
   const signOut = () => { localStorage.removeItem('htoo_token'); localStorage.removeItem('htoo_user'); setUser(null); navigate('/login') }
   const downloadDatabase = async () => {
@@ -91,7 +118,10 @@ export function WorkspaceApp({ user, setUser }: { user: User; setUser: (user: Us
   const updateUser = (nextUser: User) => { setUser(nextUser); localStorage.setItem('htoo_user', JSON.stringify(nextUser)) }
   return <div className="app-shell">
     <Sidebar page={page} collapsed={sidebarCollapsed} language={language} user={user} onToggle={() => setSidebarCollapsed((value) => !value)} onNavigate={(next) => navigate(routeForPage(next))} onSignOut={signOut} onDownloadDatabase={downloadDatabase} />
-    <main className="main">
+    <main className="main" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchEnd}>
+      <div className={cn('pull-refresh-indicator', refreshing && 'refreshing')} style={{ height: refreshing ? 54 : pullDistance }} aria-live="polite" aria-label={refreshing ? 'Refreshing data' : 'Pull down to refresh'}>
+        {(pullDistance > 8 || refreshing) && <span className="pull-refresh-spinner" />}
+      </div>
       <div className="content">
         {dataError && <div className="api-error" role="alert">Live API error: {dataError}</div>}
         {loadingData ? <Card><EmptyState title="Loading live data" description="Connecting to the HTOO API…" /></Card> : <>
