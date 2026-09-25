@@ -3,11 +3,12 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import { api, type Car, type Customer, type Invoice, type Item, type User } from './lib/api'
 import { cn } from './lib/utils'
 import { Card, EmptyState } from './components/ui'
-import { type Language, type ThemeMode, type Toast, type PrintOptions, t, pageFromPath, routeForPage, itemsFromData } from './lib/app-shared'
+import { type Language, type ThemeMode, type Toast, t, pageFromPath, routeForPage, itemsFromData } from './lib/app-shared'
 import { Sidebar } from './components/Sidebar'
+import { InvoicePrint } from './components/InvoicePrint'
 import { SettingsPage, TeamAccessPage } from './pages/AccessPages'
 import { Dashboard } from './pages/DashboardPage'
-import { InvoicesPage, InvoiceEditorPage, InvoiceDetailPage, PrintSetupDialog } from './pages/InvoicePages'
+import { InvoicesPage, InvoiceEditorPage, InvoiceDetailPage } from './pages/InvoicePages'
 import { CustomersPage, CustomerDetailPage, CarsPage, CarDetailPage, ItemsPage, ItemDetailPage } from './pages/DirectoryPages'
 
 export function WorkspaceApp({ user, setUser }: { user: User; setUser: (user: User | null) => void }) {
@@ -23,8 +24,6 @@ export function WorkspaceApp({ user, setUser }: { user: User; setUser: (user: Us
   const [catalogItems, setCatalogItems] = useState<Item[]>([])
   const [toast, setToast] = useState<Toast | null>(null)
   const [printInvoice, setPrintInvoice] = useState<Invoice | null>(null)
-  const [printConfigOpen, setPrintConfigOpen] = useState(false)
-  const [printOptions, setPrintOptions] = useState<PrintOptions>({ header: 'HTOO Heavy Vehicle', subtitle: 'Workshop service invoice', address: 'Yangon, Myanmar', phone: '', accent: '#5c5ce6', design: 'classic' })
   const [loadingData, setLoadingData] = useState(false)
   const [dataError, setDataError] = useState('')
   const [refreshing, setRefreshing] = useState(false)
@@ -46,6 +45,11 @@ export function WorkspaceApp({ user, setUser }: { user: User; setUser: (user: Us
   useEffect(() => { document.documentElement.dataset.theme = theme; localStorage.setItem('htoo_theme', theme) }, [theme])
   useEffect(() => { document.documentElement.lang = language === 'my' ? 'my' : 'en'; localStorage.setItem('htoo_language', language) }, [language])
   useEffect(() => { localStorage.setItem('htoo_sidebar_collapsed', String(sidebarCollapsed)) }, [sidebarCollapsed])
+  useEffect(() => {
+    const clearPrintedInvoice = () => setPrintInvoice(null)
+    window.addEventListener('afterprint', clearPrintedInvoice)
+    return () => window.removeEventListener('afterprint', clearPrintedInvoice)
+  }, [])
   const refreshData = useCallback(async (initialLoad = false) => {
     if (initialLoad) setLoadingData(true)
     else setRefreshing(true)
@@ -102,8 +106,10 @@ export function WorkspaceApp({ user, setUser }: { user: User; setUser: (user: Us
       notify(t(language, 'databaseDownloadError'), 'error')
     }
   }
-  const openPrintSetup = (invoice: Invoice) => { setPrintInvoice(invoice); setPrintConfigOpen(true) }
-  const printWithOptions = (options: PrintOptions) => { setPrintOptions(options); setPrintConfigOpen(false); window.setTimeout(() => window.print(), 120) }
+  const openPrintSetup = (invoice: Invoice) => {
+    setPrintInvoice(invoice)
+    window.requestAnimationFrame(() => window.setTimeout(() => window.print(), 150))
+  }
   const viewInvoice = (invoice: Invoice) => navigate(`/invoices/${invoice.id}`)
   const editInvoice = (invoice: Invoice) => navigate(`/invoices/${invoice.id}/edit`)
   const deleteInvoice = async (invoice: Invoice) => {
@@ -145,7 +151,7 @@ export function WorkspaceApp({ user, setUser }: { user: User; setUser: (user: Us
         </>}
       </div>
     </main>
-    <PrintSetupDialog open={printConfigOpen} initial={printOptions} onClose={() => setPrintConfigOpen(false)} onPrint={printWithOptions} />
+    {printInvoice && <InvoicePrint invoice={printInvoice} />}
     {toast && <div className={cn('toast', toast.kind === 'error' && 'toast-error')}>{toast.message}</div>}
   </div>
 }

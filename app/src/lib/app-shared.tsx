@@ -11,10 +11,6 @@ export type ThemeMode = 'light' | 'dark'
 
 export type PaymentType = 'pending' | 'kbz-pay' | 'cash'
 
-export type PrintDesign = 'classic' | 'minimal' | 'accent'
-
-export type PrintOptions = { header: string; subtitle: string; address: string; phone: string; accent: string; design: PrintDesign }
-
 export const paymentTypeOptions: Array<{ value: PaymentType; label: string }> = [
   { value: 'pending', label: 'pending' }, { value: 'kbz-pay', label: 'kbz-pay' }, { value: 'cash', label: 'cash' },
 ]
