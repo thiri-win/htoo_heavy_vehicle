@@ -21,3 +21,5 @@ The app uses the live API at `https://api-six-xi-11.vercel.app/api`. During loca
 - Invoice print layout with browser PDF support
 - Excel export wired to `/api/invoices/export/excel`
 - Responsive desktop/mobile shell with shadcn-inspired design tokens and primitives
+
+See [SPEC.md](./SPEC.md) for current user-facing behavior and [AGENTS.md](./AGENTS.md) for frontend boundaries and constraints.
