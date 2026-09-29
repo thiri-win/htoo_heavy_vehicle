@@ -206,3 +206,17 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.03em; 
   .invoice-print-table tfoot { display: table-row-group; }
   .invoice-print-bottom { margin-top: auto; }
 }
+
+@media print {
+  /* Leave a small physical-page tolerance to avoid browser-generated trailing sheets. */
+  .invoice-print-root { width: 210mm; margin: 0; padding: 0; }
+  .invoice-print-page { width: 210mm; height: 296mm; min-height: 296mm; max-height: 296mm; margin: 0; padding: 10mm 14mm; overflow: hidden; break-after: auto !important; page-break-after: auto !important; }
+  .invoice-print-page:not(:last-child) { break-after: page !important; page-break-after: always !important; }
+  .invoice-print-page:last-child { break-after: auto !important; page-break-after: auto !important; }
+  .invoice-print-page > .invoice-print-table { flex: 1 1 0; height: 1px; min-height: 0; }
+  .invoice-print-page > .invoice-print-table tbody { height: 100%; }
+  .invoice-print-page > .invoice-print-table tbody tr { height: 5%; }
+  .invoice-print-page > .invoice-print-table tfoot { flex: 0 0 auto; }
+  .invoice-print-page > .invoice-print-table tfoot td { height: auto; min-height: 6mm; }
+  .invoice-print-summary-page > .invoice-print-summary-totals { flex: 0 0 auto; height: auto; min-height: 0; }
+}
