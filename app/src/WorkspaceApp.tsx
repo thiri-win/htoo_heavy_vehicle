@@ -3,7 +3,7 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import { api, type Car, type Customer, type Invoice, type Item, type User } from './services/apiServices'
 import { cn } from './lib/utils'
 import { Card, EmptyState } from './components/ui'
-import { type Language, type ThemeMode, type Toast, t, pageFromPath, routeForPage, itemsFromData } from './lib/app-shared'
+import { type Language, type ThemeMode, type Toast, t, pageFromPath, routeForPage, itemsFromData, invoiceDateInputValue } from './lib/app-shared'
 import { Sidebar } from './components/Sidebar'
 import { InvoicePrint } from './pages/invoices/InvoicePrint'
 import { SettingsPage, TeamAccessPage } from './pages/AccessPages'
@@ -28,6 +28,7 @@ export function WorkspaceApp({ user, setUser }: { user: User; setUser: (user: Us
   const [catalogItems, setCatalogItems] = useState<Item[]>([])
   const [toast, setToast] = useState<Toast | null>(null)
   const [printInvoice, setPrintInvoice] = useState<Invoice | null>(null)
+  const previousPrintTitle = useRef<string | null>(null)
   const [loadingData, setLoadingData] = useState(false)
   const [dataError, setDataError] = useState('')
   const [refreshing, setRefreshing] = useState(false)
@@ -50,7 +51,13 @@ export function WorkspaceApp({ user, setUser }: { user: User; setUser: (user: Us
   useEffect(() => { document.documentElement.lang = language === 'my' ? 'my' : 'en'; localStorage.setItem('htoo_language', language) }, [language])
   useEffect(() => { localStorage.setItem('htoo_sidebar_collapsed', String(sidebarCollapsed)) }, [sidebarCollapsed])
   useEffect(() => {
-    const clearPrintedInvoice = () => setPrintInvoice(null)
+    const clearPrintedInvoice = () => {
+      setPrintInvoice(null)
+      if (previousPrintTitle.current !== null) {
+        document.title = previousPrintTitle.current
+        previousPrintTitle.current = null
+      }
+    }
     window.addEventListener('afterprint', clearPrintedInvoice)
     return () => window.removeEventListener('afterprint', clearPrintedInvoice)
   }, [])
@@ -111,6 +118,10 @@ export function WorkspaceApp({ user, setUser }: { user: User; setUser: (user: Us
     }
   }
   const openPrintSetup = (invoice: Invoice) => {
+    previousPrintTitle.current = document.title
+    const [year, month, day] = invoiceDateInputValue(invoice.date).split('-')
+    const customerName = (invoice.customer?.name || 'Invoice').replace(/[\\/:*?"<>|\u0000-\u001f]/g, '-').trim()
+    document.title = `${customerName}(${day || '00'}-${month || '00'}-${year?.slice(-2) || '00'})`
     setPrintInvoice(invoice)
     window.requestAnimationFrame(() => window.setTimeout(() => window.print(), 150))
   }
