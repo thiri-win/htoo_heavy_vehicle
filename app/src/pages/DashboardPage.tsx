@@ -1,11 +1,11 @@
 import React from 'react'
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Plus } from 'lucide-react'
-import type { Car, Invoice } from '../lib/api'
+import type { Car, Invoice } from '../services/apiServices'
 import { money } from '../lib/utils'
 import { Badge, Button, Card, EmptyState } from '../components/ui'
 import { type Language, t, normalizePaymentType } from '../lib/app-shared'
-import { InvoiceTable } from './InvoicePages'
+import { InvoiceTable } from './invoices/InvoiceList'
 
 export function Dashboard({ language, userName, invoices, cars, onViewInvoices }: { language: Language; userName: string; invoices: Invoice[]; cars: Car[]; onViewInvoices: () => void }) {
   const monthly = Array.from({ length: 6 }, (_, offset) => {

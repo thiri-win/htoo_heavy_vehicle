@@ -1,9 +1,12 @@
-import type { Invoice } from '../lib/api'
-import { invoiceDateInputValue } from '../lib/app-shared'
-import { money } from '../lib/utils'
+import type { Invoice } from '../../services/apiServices'
+import { invoiceDateInputValue } from '../../lib/app-shared'
 
 const ROWS_PER_PAGE = 20
 const CLOSING_NOTE = 'ပစ္စည်းမှာလျှင် စရန်ငွေတစ်ဝက် ချီးမြင့်ပါရန် ကျေးဇူးတင်ပါသည်။'
+
+function printAmount(value: number | string | null | undefined) {
+  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(Number(value || 0))
+}
 
 function toRoman(value: number) {
   const numerals: Array<[number, string]> = [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']]
@@ -48,10 +51,10 @@ function InvoiceMeta({ invoice }: { invoice: Invoice }) {
   </div>
 }
 
-function InvoiceRows({ lines, startIndex }: { lines: NonNullable<Invoice['details']>; startIndex: number }) {
+function InvoiceRows({ lines, startIndex, invoice, pageTotal, showInvoiceTotals }: { lines: NonNullable<Invoice['details']>; startIndex: number; invoice: Invoice; pageTotal: number; showInvoiceTotals: boolean }) {
   return <table className="invoice-print-table">
-    <colgroup><col className="serial-col" /><col className="description-col" /><col className="quantity-col" /><col className="amount-col" /></colgroup>
-    <thead><tr><th>စဉ်</th><th>အကြောင်းအရာ</th><th>အရေအတွက်</th><th>ကျသင့်ငွေ</th></tr></thead>
+    <colgroup><col className="serial-col" /><col className="description-col" /><col className="quantity-col" /><col className="price-col" /><col className="amount-col" /></colgroup>
+    <thead><tr><th>စဉ်</th><th>အကြောင်းအရာ</th><th>အရေအတွက်</th><th>စျေးနှုန်း</th><th>ကျသင့်ငွေ</th></tr></thead>
     <tbody>{Array.from({ length: ROWS_PER_PAGE }, (_, rowIndex) => {
       const detail = lines[rowIndex]
       const itemName = detail?.item?.name || detail?.name || ''
@@ -59,29 +62,33 @@ function InvoiceRows({ lines, startIndex }: { lines: NonNullable<Invoice['detail
         <td>{detail ? startIndex + rowIndex + 1 : ''}</td>
         <td>{itemName}</td>
         <td>{detail ? detail.quantity : ''}</td>
-        <td>{detail ? money(Number(detail.quantity) * Number(detail.price)) : ''}</td>
+        <td>{detail ? printAmount(detail.price) : ''}</td>
+        <td>{detail ? printAmount(Number(detail.quantity) * Number(detail.price)) : ''}</td>
       </tr>
     })}</tbody>
+    <tfoot>
+      {showInvoiceTotals ? <InvoiceTotalRows invoice={invoice} /> : <tr className="invoice-print-footer-total"><td colSpan={4}>စာမျက်နှာစုစုပေါင်း</td><td>{printAmount(pageTotal)}</td></tr>}
+    </tfoot>
   </table>
 }
 
-function Totals({ invoice, pageTotals, overall = false }: { invoice: Invoice; pageTotals: number[]; overall?: boolean }) {
+function InvoiceTotalRows({ invoice, pageTotals = [], overall = false }: { invoice: Invoice; pageTotals?: number[]; overall?: boolean }) {
   const detailsTotal = invoice.details?.reduce((sum, detail) => sum + Number(detail.quantity) * Number(detail.price), 0) || 0
   const subtotal = Number(invoice.sub_total ?? detailsTotal)
   const grandTotal = Number(invoice.grand_total ?? subtotal)
   const advance = Number(invoice.advance || 0)
-  const balance = Math.max(0, grandTotal - advance)
-  return <section className="invoice-print-totals">
-    {overall && pageTotals.map((value, index) => <div className="invoice-print-total-row" key={index}><span>စာမျက်နှာ {toRoman(index + 1)} စုစုပေါင်း</span><strong>{money(value)}</strong></div>)}
-    <div className="invoice-print-total-row"><span>စုစုပေါင်း</span><strong>{money(subtotal)}</strong></div>
-    <div className="invoice-print-total-row"><span>စရန်ငွေ</span><strong>{money(advance)}</strong></div>
-    <div className="invoice-print-total-row invoice-print-grand-total"><span>ကျန်ငွေ</span><strong>{money(balance)}</strong></div>
-  </section>
+  return <>
+    {overall && pageTotals.map((value, index) => <tr className="invoice-print-footer-total" key={index}><td colSpan={4}>စာမျက်နှာ {toRoman(index + 1)} စုစုပေါင်း</td><td>{printAmount(value)}</td></tr>)}
+    <tr className="invoice-print-footer-total"><td colSpan={4}>စုစုပေါင်း</td><td>{printAmount(subtotal)}</td></tr>
+    <tr className="invoice-print-footer-total"><td colSpan={4}>စရန်ငွေ</td><td>{printAmount(advance)}</td></tr>
+    <tr className="invoice-print-footer-total invoice-print-grand-total"><td colSpan={4}>စုစုပေါင်းကျသင့်ငွေ</td><td>{printAmount(grandTotal)}</td></tr>
+  </>
 }
 
 function SignatureAndPayment({ invoice }: { invoice: Invoice }) {
+  const paymentStatus = printedPaymentStatus(invoice.payment_type)
   return <div className="invoice-print-sign-payment">
-    <div><span>ငွေပေးချေမှု</span><strong>{printedPaymentStatus(invoice.payment_type)}</strong></div>
+    {paymentStatus && <div><span>ငွေပေးချေမှု</span><strong>{paymentStatus}</strong></div>}
     <div><span>လက်မှတ်</span><i /></div>
   </div>
 }
@@ -101,14 +108,12 @@ export function InvoicePrint({ invoice }: { invoice: Invoice }) {
   return <div className="invoice-print-root" aria-hidden="true">
     {pageTotals.map((_, pageIndex) => {
       const pageLines = lines.slice(pageIndex * ROWS_PER_PAGE, (pageIndex + 1) * ROWS_PER_PAGE)
-      const label = `Page ${toRoman(pageIndex + 1)}`
+      const label = pageCount === 1 ? 'Page 1 of 1' : `Page ${toRoman(pageIndex + 1)}`
       return <section className="invoice-print-page" key={label}>
         <InvoiceHeader />
         <InvoiceMeta invoice={invoice} />
-        <InvoiceRows lines={pageLines} startIndex={pageIndex * ROWS_PER_PAGE} />
-        {!isMultiPage && <Totals invoice={invoice} pageTotals={pageTotals} />}
+        <InvoiceRows lines={pageLines} startIndex={pageIndex * ROWS_PER_PAGE} invoice={invoice} pageTotal={pageTotals[pageIndex]} showInvoiceTotals={!isMultiPage} />
         <div className="invoice-print-bottom">
-          {isMultiPage && <div className="invoice-print-page-subtotal"><span>စာမျက်နှာ {toRoman(pageIndex + 1)} စုစုပေါင်း</span><strong>{money(pageTotals[pageIndex])}</strong></div>}
           <SignatureAndPayment invoice={invoice} />
           <PageFooter label={label} closing={!isMultiPage} />
         </div>
@@ -118,7 +123,7 @@ export function InvoicePrint({ invoice }: { invoice: Invoice }) {
       <InvoiceHeader />
       <InvoiceMeta invoice={invoice} />
       <h2 className="invoice-print-summary-title">အနှစ်ချုပ်</h2>
-      <Totals invoice={invoice} pageTotals={pageTotals} overall />
+      <table className="invoice-print-table invoice-print-summary-totals"><colgroup><col className="serial-col" /><col className="description-col" /><col className="quantity-col" /><col className="price-col" /><col className="amount-col" /></colgroup><tfoot><InvoiceTotalRows invoice={invoice} pageTotals={pageTotals} overall /></tfoot></table>
       <div className="invoice-print-bottom">
         <SignatureAndPayment invoice={invoice} />
         <PageFooter label="Summary" closing />

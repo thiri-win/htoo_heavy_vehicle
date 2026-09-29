@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
-import { api, type Car, type Customer, type Invoice, type Item, type User } from './lib/api'
+import { api, type Car, type Customer, type Invoice, type Item, type User } from './services/apiServices'
 import { cn } from './lib/utils'
 import { Card, EmptyState } from './components/ui'
 import { type Language, type ThemeMode, type Toast, t, pageFromPath, routeForPage, itemsFromData } from './lib/app-shared'
 import { Sidebar } from './components/Sidebar'
-import { InvoicePrint } from './components/InvoicePrint'
+import { InvoicePrint } from './pages/invoices/InvoicePrint'
 import { SettingsPage, TeamAccessPage } from './pages/AccessPages'
 import { Dashboard } from './pages/DashboardPage'
-import { InvoicesPage, InvoiceEditorPage, InvoiceDetailPage } from './pages/InvoicePages'
-import { CustomersPage, CustomerDetailPage, CarsPage, CarDetailPage, ItemsPage, ItemDetailPage } from './pages/DirectoryPages'
+import { InvoicesPage } from './pages/invoices/InvoiceList'
+import { InvoiceEditorPage } from './pages/invoices/InvoiceForm'
+import { InvoiceDetailPage } from './pages/invoices/InvoiceDetail'
+import { CustomersPage, CustomerDetailPage } from './pages/customers'
+import { CarsPage, CarDetailPage } from './pages/cars'
+import { ItemsPage, ItemDetailPage } from './pages/items'
 
 export function WorkspaceApp({ user, setUser }: { user: User; setUser: (user: User | null) => void }) {
   const { pathname } = useLocation()

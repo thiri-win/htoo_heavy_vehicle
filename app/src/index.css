@@ -176,3 +176,33 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.03em; 
   .editor-totals .invoice-total-row { grid-template-columns: minmax(0, 1fr) 48px 62px 70px 28px; gap: 4px; }
   .line-item-total { font-size: 10px; }
 }
+
+/* Harmonized A4 invoice typography and table-footer totals. */
+.invoice-print-header { border-bottom: 0; padding-bottom: 0; }
+.invoice-print-meta > div { font-size: 9pt; line-height: 1.2; padding: 1mm 1.5mm; }
+.invoice-print-meta span, .invoice-print-meta strong { font-size: inherit; line-height: inherit; }
+.invoice-print-meta strong { font-weight: 600; }
+.invoice-print-table { font-size: 9pt; line-height: 1.2; }
+.invoice-print-table .serial-col { width: 10mm; }
+.invoice-print-table .quantity-col { width: 20mm; }
+.invoice-print-table .price-col { width: 30mm; }
+.invoice-print-table .amount-col { width: 32mm; }
+.invoice-print-table th, .invoice-print-table td { height: 6mm; padding: 1mm 1.5mm; line-height: 1.2; font-size: 9pt; }
+.invoice-print-table th { height: 7mm; font-weight: 700; }
+.invoice-print-table th:nth-child(3), .invoice-print-table td:nth-child(3) { text-align: center; }
+.invoice-print-table th:nth-child(4), .invoice-print-table td:nth-child(4), .invoice-print-table th:nth-child(5), .invoice-print-table td:nth-child(5) { text-align: right; white-space: nowrap; }
+.invoice-print-table tfoot tr { break-inside: avoid; page-break-inside: avoid; }
+.invoice-print-table tfoot td { height: 6mm; font-size: 9pt; line-height: 1.2; padding: 1mm 1.5mm; font-weight: 700; }
+.invoice-print-table tfoot td:first-child { text-align: right; }
+.invoice-print-grand-total td { border-top-width: 1pt !important; }
+.invoice-print-footer > strong { font-weight: 700; }
+.invoice-print-summary-totals { margin-top: 0; }
+@media print {
+  .invoice-print-page { height: 297mm; min-height: 297mm; break-inside: avoid; page-break-inside: avoid; padding: 10mm 14mm 10mm; }
+  .invoice-print-page:not(:last-child) { break-after: page; page-break-after: always; }
+  .invoice-print-page:last-child { break-after: auto; page-break-after: auto; }
+  .invoice-print-table { break-inside: avoid; page-break-inside: avoid; }
+  .invoice-print-table thead { display: table-header-group; }
+  .invoice-print-table tfoot { display: table-row-group; }
+  .invoice-print-bottom { margin-top: auto; }
+}

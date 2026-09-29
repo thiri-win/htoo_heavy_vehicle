@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import type { User } from './lib/api'
+import type { User } from './services/apiServices'
 import { WorkspaceApp } from './WorkspaceApp'
 import { Login } from './pages/AccessPages'
 

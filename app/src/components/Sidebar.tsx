@@ -1,5 +1,5 @@
 import { ChevronsLeft, ChevronsRight, Download, LogOut, Settings, ShieldCheck } from 'lucide-react'
-import type { User } from '../lib/api'
+import type { User } from '../services/apiServices'
 import { initials, cn } from '../lib/utils'
 import { type PageName, type Language, navItems, t, activeNavPage } from '../lib/app-shared'
 

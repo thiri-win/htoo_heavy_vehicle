@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react'
 import { X } from 'lucide-react'
-import { cn } from '../lib/utils'
+import { cn } from '../../lib/utils'
 
 export function Button({ className, variant = 'primary', size = 'default', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline'; size?: 'sm' | 'default' | 'icon' }) {
   return <button className={cn('btn', `btn-${variant}`, `btn-${size}`, className)} {...props} />
