@@ -14,12 +14,24 @@ export type Page<T> = { data: T[]; pagination?: { total_items: number; current_p
 // the `/api` path (for example: https://api-six-xi-11.vercel.app/api).
 const API_BASE = (import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/api' : 'https://api-six-xi-11.vercel.app/api')).replace(/\/$/, '')
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+function expireSession() {
+  localStorage.removeItem('htoo_token')
+  localStorage.removeItem('htoo_user')
+  window.dispatchEvent(new Event('htoo:unauthorized'))
+}
+
+async function authorizedFetch(path: string, init?: RequestInit): Promise<Response> {
   const token = localStorage.getItem('htoo_token')
   const response = await fetch(`${API_BASE}${path}`, {
     ...init,
-    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(init?.headers || {}) },
+    headers: { ...(init?.body ? { 'Content-Type': 'application/json' } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(init?.headers || {}) },
   })
+  if (response.status === 401 && token) expireSession()
+  return response
+}
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await authorizedFetch(path, init)
   if (!response.ok) throw new Error((await response.json().catch(() => null))?.error || `Request failed (${response.status})`)
   const contentType = response.headers.get('content-type') || ''
   return contentType.includes('json') ? response.json() : response as unknown as T
@@ -46,6 +58,6 @@ export const api = {
   async createInvoice(data: unknown) { return request<{ data: Invoice }>('/invoices', { method: 'POST', body: JSON.stringify(data) }) },
   async updateInvoice(id: number, data: unknown) { return request<{ data: Invoice }>(`/invoices/${id}`, { method: 'PATCH', body: JSON.stringify(data) }) },
   async deleteInvoice(id: number) { return request(`/invoices/${id}`, { method: 'DELETE' }) },
-  async exportInvoices(params = '') { const token = localStorage.getItem('htoo_token'); const response = await fetch(`${API_BASE}/invoices/export/excel${params ? `?${params}` : ''}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} }); if (!response.ok) throw new Error('Could not export report'); return response.blob() },
-  async downloadDatabase() { const token = localStorage.getItem('htoo_token'); const response = await fetch(`${API_BASE}/admin/database`, { headers: token ? { Authorization: `Bearer ${token}` } : {} }); if (!response.ok) throw new Error((await response.json().catch(() => null))?.error || 'Could not download the database backup'); return response.blob() },
+  async exportInvoices(params = '') { const response = await authorizedFetch(`/invoices/export/excel${params ? `?${params}` : ''}`); if (!response.ok) throw new Error('Could not export report'); return response.blob() },
+  async downloadDatabase() { const response = await authorizedFetch('/admin/database'); if (!response.ok) throw new Error((await response.json().catch(() => null))?.error || 'Could not download the database backup'); return response.blob() },
 }

@@ -142,3 +142,37 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.03em; 
   .invoice-print-bottom, .invoice-print-totals, .invoice-print-sign-payment, .invoice-print-footer { break-inside: avoid; page-break-inside: avoid; }
   .invoice-print-root, .invoice-print-page, .invoice-print-table th, .invoice-print-table td, .invoice-print-footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* Invoice screens use the full workspace width; keep line totals and summaries in the same amount column. */
+.invoice-editor-card { width: 100%; max-width: none; }
+.invoice-editor-card .form-grid { width: 100%; max-width: none; }
+.line-item { grid-template-columns: minmax(0, 1fr) 80px 105px 105px 30px; }
+.line-item-header { color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.line-item-header span:not(:first-child) { text-align: right; }
+.line-item-total { color: var(--navy); font-size: 12px; text-align: right; white-space: nowrap; }
+.editor-totals { width: 100%; }
+.editor-totals .invoice-total-row { display: grid; grid-template-columns: minmax(0, 1fr) 80px 105px 105px 30px; gap: 7px; }
+.editor-totals .invoice-total-row span { grid-column: 1 / 4; }
+.editor-totals .invoice-total-row strong { grid-column: 4; justify-self: end; white-space: nowrap; }
+.detail-grid, .detail-lines-card { width: 100%; max-width: none; }
+.invoice-detail-table { min-width: 640px; table-layout: fixed; }
+.invoice-detail-table th:first-child, .invoice-detail-table td:first-child { width: 52%; }
+.invoice-detail-table th:nth-child(2), .invoice-detail-table td:nth-child(2) { width: 12%; }
+.invoice-detail-table th:nth-child(3), .invoice-detail-table td:nth-child(3) { width: 18%; }
+.invoice-detail-table th:last-child, .invoice-detail-table td:last-child { width: 18%; text-align: right; }
+.invoice-detail-table tfoot td { border-top: 1px solid var(--line); padding: 11px 14px; color: var(--muted); font-size: 12px; }
+.invoice-detail-table tfoot td:last-child { white-space: nowrap; }
+.invoice-detail-table tfoot td strong { color: var(--navy); }
+.invoice-detail-table tfoot .invoice-detail-grand td { border-top: 2px solid var(--line); color: var(--navy); font-size: 14px; font-weight: 700; }
+.invoice-detail-table tfoot .invoice-detail-grand td strong { font-size: 14px; }
+.sidebar { height: 100vh; height: 100dvh; overscroll-behavior: contain; }
+.sidebar > .brand, .sidebar > .nav-label, .sidebar > .nav, .sidebar > .sidebar-bottom { flex-shrink: 0; }
+@media (max-width: 760px) {
+  .line-item { grid-template-columns: minmax(0, 1fr) 60px 82px 92px 30px; }
+  .editor-totals .invoice-total-row { grid-template-columns: minmax(0, 1fr) 60px 82px 92px 30px; }
+}
+@media (max-width: 480px) {
+  .line-item { grid-template-columns: minmax(0, 1fr) 48px 62px 70px 28px; gap: 4px; }
+  .editor-totals .invoice-total-row { grid-template-columns: minmax(0, 1fr) 48px 62px 70px 28px; gap: 4px; }
+  .line-item-total { font-size: 10px; }
+}

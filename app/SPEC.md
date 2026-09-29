@@ -4,7 +4,7 @@ This document describes the changeable user-facing feature scope. Update it when
 
 ## Authentication
 
-Users can sign in or sign up through the API. An authenticated session opens the workspace; signing out clears the local session. The UI must show authentication failures clearly.
+Users can sign in or sign up through the API. An authenticated session opens the workspace; signing out clears the local session. If a protected API request returns 401, the app clears the saved session and returns the user to the login screen. The UI must show authentication failures clearly.
 
 ## Workspace
 

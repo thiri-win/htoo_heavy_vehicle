@@ -29,7 +29,7 @@ export const extraTranslations: Record<Language, Record<string, string>> = {
   my: { deletionWarning: 'ဤအကြောင်းအရာနှင့်သတ်ဆိုင်သော အခြားဆက်စပ်သောအရာများ အကုန် ပျက်သွားနိုင်ပါတယ်', customerDeleted: 'ဖောက်သည်ကို အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။', vehicleDeleted: 'ယာဉ်ကို အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။', invoiceDeleted: 'ငွေတောင်းခံလွှာကို အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။', itemUpdated: 'ပစ္စည်းကို အောင်မြင်စွာ ပြင်ဆင်လိုက်ပါပြီ။', itemDeleted: 'ပစ္စည်းကို အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။', customerDeleteError: 'ဖောက်သည်ကို ဖျက်၍မရပါ။', vehicleDeleteError: 'ယာဉ်ကို ဖျက်၍မရပါ။', invoiceDeleteError: 'ငွေတောင်းခံလွှာကို ဖျက်၍မရပါ။', itemUpdateError: 'ပစ္စည်းကို ပြင်ဆင်၍မရပါ။', itemDeleteError: 'ပစ္စည်းကို ဖျက်၍မရပါ။', downloadDatabase: 'ဒေတာဘေ့စ် ဒေါင်းလုဒ်ရန်', databaseDownloaded: 'ဒေတာဘေ့စ် အရန်ကူးဖိုင်ကို ဒေါင်းလုဒ်ပြီးပါပြီ။', databaseDownloadError: 'ဒေတာဘေ့စ် အရန်ကူးဖိုင်ကို ဒေါင်းလုဒ်မရပါ။' },
 }
 
-export function t(language: Language, key: string) { return translations[language][key] || extraTranslations[language][key] || translations.en[key] || extraTranslations.en[key] || key }
+export function t(language: Language, key: string) { if (language === 'my' && key === 'subtotal') return 'စုစုပေါင်း'; return translations[language][key] || extraTranslations[language][key] || translations.en[key] || extraTranslations.en[key] || key }
 
 export function normalizePaymentType(value: string | null | undefined): PaymentType {
   const normalized = (value || '').toLowerCase().replace('_', '-')
