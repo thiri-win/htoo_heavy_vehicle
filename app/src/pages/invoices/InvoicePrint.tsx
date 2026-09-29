@@ -54,7 +54,7 @@ function InvoiceMeta({ invoice }: { invoice: Invoice }) {
 function InvoiceRows({ lines, startIndex, invoice, pageTotal, showInvoiceTotals }: { lines: NonNullable<Invoice['details']>; startIndex: number; invoice: Invoice; pageTotal: number; showInvoiceTotals: boolean }) {
   return <table className="invoice-print-table">
     <colgroup><col className="serial-col" /><col className="description-col" /><col className="quantity-col" /><col className="price-col" /><col className="amount-col" /></colgroup>
-    <thead><tr><th>စဉ်</th><th>အကြောင်းအရာ</th><th>အရေအတွက်</th><th>တစ်ခုစျေးနှုန်း</th><th>ကျသင့်ငွေ</th></tr></thead>
+    <thead><tr><th>စဉ်</th><th>အကြောင်းအရာ</th><th>အရေအတွက်</th><th>ဈေးနှုန်း</th><th>ကျသင့်ငွေ</th></tr></thead>
     <tbody>{Array.from({ length: ROWS_PER_PAGE }, (_, rowIndex) => {
       const detail = lines[rowIndex]
       const itemName = detail?.item?.name || detail?.name || ''
@@ -87,7 +87,7 @@ function SignatureAndPayment({ invoice }: { invoice: Invoice }) {
   const paymentStatus = printedPaymentStatus(invoice.payment_type)
   return <div className="invoice-print-sign-payment">
     {paymentStatus && <div><span>ငွေပေးချေမှု</span><strong>{paymentStatus}</strong></div>}
-    <div><span>လက်မှတ်</span><i /></div>
+    <div className="invoice-print-signature"><span>လက်မှတ်</span><i /></div>
   </div>
 }
 

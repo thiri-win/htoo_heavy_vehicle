@@ -220,3 +220,6 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.03em; 
   .invoice-print-page > .invoice-print-table tfoot td { height: auto; min-height: 6mm; }
   .invoice-print-summary-page > .invoice-print-summary-totals { flex: 0 0 auto; height: auto; min-height: 0; }
 }
+.invoice-print-sign-payment { display: flex; justify-content: space-between; }
+.invoice-print-sign-payment > div { width: 45%; }
+.invoice-print-sign-payment > .invoice-print-signature { margin-left: auto; }
